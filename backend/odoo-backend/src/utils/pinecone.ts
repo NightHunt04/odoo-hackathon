@@ -13,13 +13,13 @@ const pc = new Pinecone({
 })
 
 export async function upsertQuestion(questions: Question[]) {
-    const index = pc.index('questions')
-    await index.namespace('stackit').upsert(questions)
+    const index = pc.index('stackit')
+    await index.namespace('questions').upsert(questions)
 }
   
 export async function searchQuestions(queryText: string, topK = 5) {
-    const index = pc.index('questions')
-    const namespace = index.namespace('stackit')
+    const index = pc.index('stackit')
+    const namespace = index.namespace('questions')
     const results = await namespace.searchRecords({
             query: {
                 topK,
@@ -31,4 +31,30 @@ export async function searchQuestions(queryText: string, topK = 5) {
     return results
 }
 
-export const index = pc.index('questions')
+interface Answer {
+    id: string
+    chunk_text: string
+    metadata: {
+        questionId: string
+    }
+}
+
+export async function upsertAnswer(answer: Answer[]) {
+    const index = pc.index('stackit')
+    await index.namespace('answers').upsert(answer)
+}
+
+export async function searchAnswers(queryText: string, topK = 5) {
+    const index = pc.index('stackit')
+    const namespace = index.namespace('answers')
+    const results = await namespace.searchRecords({
+            query: {
+                topK,
+                inputs: { text: queryText },
+            }
+        })
+    
+    return results
+}
+
+export const index = pc.index('stackit')
